@@ -6,7 +6,7 @@ const board = (() => {
         "", "", "",
         "", "", ""
     ];
-    
+
     const reset = () => {
         board = [
             "", "", "",
@@ -62,6 +62,13 @@ const board = (() => {
         }
         return false;
     }
+    
+    const tie = () => {
+        if(!board.includes("")){
+            return true;
+        }
+    }
+
     //display game board
     const render = () =>{
         const cells = document.querySelectorAll('.cell');
@@ -70,7 +77,7 @@ const board = (() => {
         }
     }
 
-    return {render, setCell, checkWinner, getCell, reset};
+    return {render, setCell, checkWinner, getCell, reset, tie};
 })();
 
 const Player = (name, mark) => {
@@ -86,6 +93,7 @@ const gameState = (() => {
     const submitForm = document.getElementById('submit');
     const inputs = document.querySelectorAll('input');
     const turnString = document.getElementById('turn');
+    const reset = document.getElementById('reset');
     const player1 = Player();
     const player2 = Player();
     var turn = player1; //start with x turn
@@ -99,10 +107,9 @@ const gameState = (() => {
     const startGame = () => {
         form.style.display = 'block'; //display form
         submitForm.addEventListener('click', initPlayers);
-        cells.forEach(cell => cell.addEventListener('click', function(){
-            const clicked = cell;
-            move(clicked);
-        }));
+        closeForm.addEventListener('click', function(){
+            form.style.display = 'none';
+        })
     }
 
     const initPlayers = () => {
@@ -113,6 +120,16 @@ const gameState = (() => {
             player2.name = inputs[1].value;
             player2.mark = "O";
             turnString.innerText = `${turn.name}'s turn`
+            cells.forEach(cell => cell.addEventListener('click', function(){
+                const clicked = cell;
+                move(clicked);
+            }));
+            reset.addEventListener('click', function(){
+                board.reset();
+                board.render();
+                turn=player1;
+                turnString.innerText = `${player1.name}'s turn`;
+            })
         }
         else{
             alert("please enter names!");
@@ -143,7 +160,15 @@ const gameState = (() => {
             board.reset();
             board.render();
         }
-        switchTurns();
+        else if(board.tie()){
+            turnString.innerText = 'tie'
+            alert('tie!');
+            board.reset();
+            board.render();
+        }
+        else{
+            switchTurns();
+        }
     }
 
     return{started}
